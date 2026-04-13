@@ -1,0 +1,30 @@
+
+> project@1.0.0 dev
+> next dev
+
+  ▲ Next.js 14.2.35
+  - Local:        http://localhost:3006
+  - Environments: .env
+
+ ✓ Starting...
+ ✓ Ready in 1997ms
+ ✓ Compiled /middleware in 463ms (72 modules)
+ ○ Compiling /discover ...
+ ✓ Compiled /discover in 4.3s (505 modules)
+ ✓ Compiled in 401ms (260 modules)
+ GET /discover 200 in 4758ms
+ ○ Compiling /api/matchboard ...
+ ✓ Compiled /api/matchboard in 4s (332 modules)
+ ✓ Compiled (334 modules)
+ GET /api/courts?city=Biratnagar 200 in 5309ms
+ GET /api/courts?city=Biratnagar 200 in 299ms
+ GET /api/matchboard 200 in 5844ms
+ GET /api/matchboard 200 in 590ms
+ GET /api/courts?city=All 200 in 320ms
+ GET /api/courts?city=Biratnagar 200 in 411ms
+ GET /api/courts?city=Kathmandu 200 in 304ms
+ GET /api/courts?city=Biratnagar 200 in 386ms
+ GET /api/courts?city=All 200 in 497ms
+ GET /api/courts?city=Biratnagar 200 in 432ms
+ GET /api/courts?city=Kathmandu 200 in 1510ms
+ GET /api/courts?city=Biratnagar 200 in 999ms

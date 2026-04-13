@@ -1,0 +1,121 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum UserRole {
+  PLAYER
+  OWNER
+
+  @@map("user_role")
+}
+
+enum SlotStatus {
+  AVAILABLE
+  HELD
+  BOOKED
+
+  @@map("slot_status")
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+
+  @@map("payment_status")
+}
+
+model User {
+  id          String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name        String
+  phoneNumber String      @unique @map("phone_number")
+  role        UserRole
+  createdAt   DateTime    @default(now()) @db.Timestamptz(6) @map("created_at")
+  updatedAt   DateTime    @updatedAt @db.Timestamptz(6) @map("updated_at")
+
+  ownedCourts Court[]     @relation("OwnerCourts")
+  bookings    Booking[]   @relation("PlayerBookings")
+  matchPosts  MatchPost[]
+
+  @@map("users")
+}
+
+model Court {
+  id           String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  ownerId      String     @db.Uuid @map("owner_id")
+  name         String
+  location     String
+  pricePerHour Decimal    @db.Decimal(10, 2) @map("price_per_hour")
+  images       String[]   @default([])
+  createdAt    DateTime   @default(now()) @db.Timestamptz(6) @map("created_at")
+  updatedAt    DateTime   @updatedAt @db.Timestamptz(6) @map("updated_at")
+
+  owner        User       @relation("OwnerCourts", fields: [ownerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  slots        Slot[]
+  bookings     Booking[]
+
+  @@index([ownerId], map: "idx_courts_owner_id")
+  @@index([location], map: "idx_courts_location")
+  @@map("courts")
+}
+
+model Slot {
+  id        String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  courtId   String      @db.Uuid @map("court_id")
+  startTime DateTime    @db.Timestamptz(6) @map("start_time")
+  endTime   DateTime    @db.Timestamptz(6) @map("end_time")
+  status    SlotStatus  @default(AVAILABLE)
+  createdAt DateTime    @default(now()) @db.Timestamptz(6) @map("created_at")
+  updatedAt DateTime    @updatedAt @db.Timestamptz(6) @map("updated_at")
+
+  court     Court       @relation(fields: [courtId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  booking   Booking?
+
+  @@index([courtId], map: "idx_slots_court_id")
+  @@index([courtId, startTime, endTime], map: "idx_slots_court_time_window")
+  @@index([status, startTime], map: "idx_slots_status_start_time")
+  @@map("slots")
+}
+
+model Booking {
+  id            String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId        String        @db.Uuid @map("user_id")
+  courtId       String        @db.Uuid @map("court_id")
+  slotId        String        @unique @db.Uuid @map("slot_id")
+  amount        Decimal       @db.Decimal(10, 2)
+  paymentStatus PaymentStatus @default(PENDING) @map("payment_status")
+  createdAt     DateTime      @default(now()) @db.Timestamptz(6) @map("created_at")
+  updatedAt     DateTime      @updatedAt @db.Timestamptz(6) @map("updated_at")
+
+  user          User          @relation("PlayerBookings", fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  court         Court         @relation(fields: [courtId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  slot          Slot          @relation(fields: [slotId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@index([userId], map: "idx_bookings_user_id")
+  @@index([courtId], map: "idx_bookings_court_id")
+  @@index([paymentStatus], map: "idx_bookings_payment_status")
+  @@map("bookings")
+}
+
+model MatchPost {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  postType  String   @map("post_type")
+  content   String
+  location  String
+  matchTime String   @map("match_time")
+  userId    String   @db.Uuid @map("user_id")
+  createdAt DateTime @default(now()) @db.Timestamptz(6) @map("created_at")
+  updatedAt DateTime @updatedAt @db.Timestamptz(6) @map("updated_at")
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@index([userId], map: "idx_match_posts_user_id")
+  @@index([createdAt], map: "idx_match_posts_created_at")
+  @@map("match_posts")
+}
