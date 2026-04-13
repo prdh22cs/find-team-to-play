@@ -27,7 +27,7 @@ export default function LoginPage() {
 
       if (!res.ok) {
         const data = await res.json();
-        throw new Error(data.error || "Failed to send OTP");
+        throw new Error(data.message || data.error || "Failed to send OTP");
       }
 
       setStep(2);
@@ -57,7 +57,7 @@ export default function LoginPage() {
 
       if (!res.ok) {
         const data = await res.json();
-        throw new Error(data.error || "Verification failed");
+        throw new Error(data.message || data.error || "Verification failed");
       }
 
       if (role === "PLAYER") {
